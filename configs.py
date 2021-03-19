@@ -39,3 +39,4 @@ def setup_cfg():
     cfg.DATALOADER.REPEAT_THRESHOLD=0.01
     os.makedirs(cfg.OUTPUT_DIR, exist_ok=True)#lets just check our output dir exists
     cfg.MODEL.BACKBONE.FREEZE_AT=6
+    return cfg

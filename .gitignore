@@ -1,2 +1,6 @@
 .DS_Store
 .vscode/
+script_train.sh
+__pycache__/
+output/
+slurm_log/

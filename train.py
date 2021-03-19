@@ -37,17 +37,17 @@ def get_dataset(dataset_path):
 
             # parsing rotated bounding box
             rotated_bboxes = []
-            rbbox_filename = os.path.join(dataset_path, 'rrbox/%s.txt' % v["filename"][:-4])
+            rbbox_filename = os.path.join(dataset_path, 'rbbox/%s.txt' % v["filename"][:-4])
             with open(rbbox_filename) as bbox_file:
                 lines = bbox_file.readlines()
                 for line in lines:
                     temp = line.split()
                     assert len(temp) == 6
-                    cx = temp[1]
-                    cy = temp[2]
-                    w = temp[3]
-                    h = temp[4]
-                    a = 180 - math.degrees(temp[5])
+                    cx = float(temp[1])
+                    cy = float(temp[2])
+                    w = float(temp[3])
+                    h = float(temp[4])
+                    a = 180 - math.degrees(float(temp[5]))
                     rbbox = [cx, cy, w, h, a]
                     rotated_bboxes.append(rbbox)
 
@@ -82,7 +82,7 @@ def main():
     DatasetCatalog.clear()
     MetadataCatalog.clear()
     for d in ['train']:
-        DatasetCatalog.register(d, lambda d=d: get_dataset(d))
+        DatasetCatalog.register(d, lambda d=d: get_dataset(os.path.join(dataset_path, d)))
         MetadataCatalog.get(d).set(thing_classes=['car'])
 
     # setup config

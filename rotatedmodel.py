@@ -1,6 +1,6 @@
 from detectron2.data.build import build_detection_train_loader
 from detectron2.engine import DefaultTrainer
-from detectron2.evaluation import RotatedCOCOEvaluator,DatasetEvaluators,
+from detectron2.evaluation import RotatedCOCOEvaluator,DatasetEvaluators
 from detectron2.utils.visualizer import Visualizer
 from detectron2.structures import BoxMode
 import cv2
