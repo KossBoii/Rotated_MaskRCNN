@@ -27,7 +27,8 @@ def custom_mapper(dataset_dict):
 
     input = T.AugInput(image)
     transforms = augs(input)
-    image = torch.from_numpy(input.image.transpose(2,0,1))
+    # image = torch.from_numpy(input.image.transpose(2,0,1))
+    image = torch.as_tensor(input.image.transpose(2, 0, 1))
 
     annos = [
         transform_instance_annotations_rotated(annotation, transforms, image.shape[1:])
