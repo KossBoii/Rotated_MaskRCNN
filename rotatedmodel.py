@@ -6,6 +6,7 @@ from detectron2.structures import BoxMode
 import cv2
 import os
 from utils import custom_mapper
+import numpy as np
 
 class RotatedTrainer(DefaultTrainer):
     @classmethod

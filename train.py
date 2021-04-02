@@ -99,12 +99,12 @@ def main():
     predictor = DefaultPredictor(cfg)
     
     # visualize the result
-    img = cv2.imread('test_img.jpeg')
+    img = cv2.imread('./dataset/train/imgs/DJI_0064.JPG')
     outputs = predictor(img)
     vis = RotatedVisualizer(
         img[:, :, ::-1],
         metadata=MetadataCatalog.get("Train"), 
-        scale=0.5
+        scale=1.0
     )
 
     out = vis.draw_instance_predictions(outputs["instances"].to("cpu"))

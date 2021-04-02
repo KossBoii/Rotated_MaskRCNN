@@ -6,7 +6,7 @@ from detectron2.data import transforms as T
 import torch
 
 def transform_instance_annotations_rotated(annotation, transforms, image_size, *, keypoint_hflip_indices=None):
-    if annotation["bbox_mode"] == BoxMode.XYWHA_ABS:
+    if annotation["bbox_mode"] == BoxMode.XYWHA_ABS:        # rotated bbox
         annotation["bbox"] = transforms.apply_rotated_box(np.asarray([annotation["bbox"]]))[0]
     else:
         bbox = BoxMode.convert(annotation["bbox"], annotation["bbox_mode"], BoxMode.XYXY_ABS)
@@ -27,7 +27,8 @@ def custom_mapper(dataset_dict):
 
     input = T.AugInput(image)
     transforms = augs(input)
-    image = torch.from_numpy(input.image.transpose(2,0,1))
+    # image = torch.from_numpy(input.image.transpose(2,0,1))
+    image = torch.as_tensor(image.transpose(2, 0, 1))
 
     annos = [
         transform_instance_annotations_rotated(annotation, transforms, image.shape[1:])
