@@ -6,6 +6,10 @@ from detectron2.data import DatasetCatalog, MetadataCatalog
 import cv2
 import json
 import math
+import argparse
+import torch
+import sys
+from detectron2.engine import launch
 
 id_to_category = {
     0: 'car'
@@ -116,7 +120,7 @@ def get_dataset(dataset_path):
             dataset_dicts.append(record)
     return dataset_dicts
 
-def main():
+def main(args):
     ROOT_DIR = os.getcwd()
     dataset_path = os.path.join(ROOT_DIR, 'dataset')
 
@@ -132,9 +136,14 @@ def main():
     cfg.dump()
 
     # training starts
-    trainer = RotatedTrainer(cfg)
-    trainer.resume_or_load(resume=True)
-    trainer.train()
+    if args.model == 'normal':
+        trainer = Trainer(cfg)
+        trainer.resume_or_load(resume=True)
+        trainer.train()
+    elif args.model == 'rotate':
+        trainer = RotatedTrainer(cfg)
+        trainer.resume_or_load(resume=True)
+        trainer.train()
 
     # predictions
     cfg.MODEL.WEIGHTS = os.path.join(cfg.OUTPUT_DIR, "model_final.pth")
@@ -152,7 +161,64 @@ def main():
     out = vis.draw_instance_predictions(outputs["instances"].to("cpu"))
     cv2.imsave('result.jpeg', out.get_image()[:, :, ::-1])
 
+def custom_default_argument_parser(epilog=None):
+    """
+    Create a parser with some common arguments used by detectron2 users.
+    Args:
+        epilog (str): epilog passed to ArgumentParser describing the usage.
+    Returns:
+        argparse.ArgumentParser:
+    """
+    parser = argparse.ArgumentParser(
+        epilog=epilog
+        or f"""
+Examples:
+Run on single machine:
+    $ {sys.argv[0]} --num-gpus 8 --config-file cfg.yaml MODEL.WEIGHTS /path/to/weight.pth
+Run on multiple machines:
+    (machine0)$ {sys.argv[0]} --machine-rank 0 --num-machines 2 --dist-url <URL> [--other-flags]
+    (machine1)$ {sys.argv[0]} --machine-rank 1 --num-machines 2 --dist-url <URL> [--other-flags]
+""",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+    )
+    parser.add_argument("--model", default='normal', help='type of the model (normal/rotate)')
+    parser.add_argument(
+        "--backbone", default="COCO-InstanceSegmentation/mask_rcnn_R_50_FPN_3x.yaml", help="backbone model"
+    )
+    parser.add_argument("--num-gpus", type=int, default=1, help="number of gpus *per machine*")
+    parser.add_argument("--num-machines", type=int, default=1, help="total number of machines")
+    parser.add_argument(
+        "--machine-rank", type=int, default=0, help="the rank of this machine (unique per machine)"
+    )
+
+    # PyTorch still may leave orphan processes in multi-gpu training.
+    # Therefore we use a deterministic way to obtain port,
+    # so that users are aware of orphan processes by seeing the port occupied.
+    port = 2 ** 15 + 2 ** 14 + hash(os.getuid() if sys.platform != "win32" else 1) % 2 ** 14
+    parser.add_argument(
+        "--dist-url",
+        default="tcp://127.0.0.1:{}".format(port),
+        help="initialization URL for pytorch distributed backend. See "
+        "https://pytorch.org/docs/stable/distributed.html for details.",
+    )
+    parser.add_argument(
+        "opts",
+        help="Modify config options using the command-line",
+        default=None,
+        nargs=argparse.REMAINDER,
+    )
+    return parser
 
 if __name__ == '__main__':
-    main()
+    args = custom_default_argument_parser().parse_args()
+    print("Command Line Args:", args)
+    torch.backends.cudnn.benchmark = True
+    launch(
+        main,
+        args.num_gpus,
+        num_machines=args.num_machines,
+        machine_rank=args.machine_rank,
+        dist_url=args.dist_url,
+        args=(args,),
+    )
 
