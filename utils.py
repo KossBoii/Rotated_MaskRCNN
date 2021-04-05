@@ -4,7 +4,7 @@ from detectron2.structures import BoxMode
 from detectron2.data import detection_utils as utils
 from detectron2.data import transforms as T
 import torch
-import np
+import numpy as np
 
 def transform_instance_annotations_rotated(annotation, transforms, image_size, *, keypoint_hflip_indices=None):
     if annotation["bbox_mode"] == BoxMode.XYWHA_ABS:        # rotated bbox
