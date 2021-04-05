@@ -53,7 +53,7 @@ def setup_rotated_cfg(args):
     cfg.INPUT.MAX_SIZE_TEST = 800
 
     cfg.DATALOADER.NUM_WORKERS = 4
-    cfg.SOLVER.IMS_PER_BATCH = 25
+    cfg.SOLVER.IMS_PER_BATCH = 50
     cfg.DATALOADER.FILTER_EMPTY_ANNOTATIONS = True 
     cfg.DATALOADER.SAMPLER_TRAIN= "RepeatFactorTrainingSampler"
     cfg.DATALOADER.REPEAT_THRESHOLD=0.01
@@ -84,7 +84,7 @@ def setup_cfg(args):
     # cfg.DATASETS.TEST = (["Test"])
     
     cfg.DATALOADER.NUM_WORKERS = 4
-    cfg.SOLVER.IMS_PER_BATCH = 25                    # 2 GPUs --> each GPU will see 25 image per batch
+    cfg.SOLVER.IMS_PER_BATCH = 50                    # 2 GPUs --> each GPU will see 25 image per batch
     cfg.SOLVER.WARMUP_ITERS = 2000                  # 
     cfg.SOLVER.BASE_LR = 0.001
     cfg.SOLVER.MAX_ITER = 10000
