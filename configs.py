@@ -67,3 +67,4 @@ def setup_cfg():
     cfg.INPUT.MAX_SIZE_TRAIN = 800
     cfg.INPUT.MIN_SIZE_TEST = 600
     cfg.INPUT.MAX_SIZE_TEST = 800
+    return cfg

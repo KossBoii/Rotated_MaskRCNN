@@ -4,3 +4,4 @@ script_train.sh
 __pycache__/
 output/
 slurm_log/
+dataset/

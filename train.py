@@ -86,7 +86,7 @@ def get_dataset(dataset_path):
             record = {}         # a dictionary to store all necessary info of each image in the dataset
             
             # open the image to get the height and width
-            filename = os.path.join(img_dir, v["filename"])
+            filename = os.path.join(dataset_path, 'imgs/' + v["filename"])
             height, width = cv2.imread(filename).shape[:2]
             
             record["file_name"] = filename
