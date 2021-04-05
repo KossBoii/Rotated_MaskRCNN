@@ -5,8 +5,13 @@ from detectron2.utils.visualizer import Visualizer
 from detectron2.structures import BoxMode
 import cv2
 import os
-from utils import custom_mapper
+from utils import custom_mapper, custom_rotated_mapper
 import numpy as np
+
+class Trainer(DefaultTrainer):
+    @classmethod
+    def build_train_loader(cls, cfg):
+        return build_detection_train_loader(cfg, mapper=custom_mapper)
 
 class RotatedTrainer(DefaultTrainer):
     @classmethod
@@ -17,7 +22,7 @@ class RotatedTrainer(DefaultTrainer):
 
     @classmethod
     def build_train_loader(cls, cfg):
-        return build_detection_train_loader(cfg, mapper=custom_mapper)
+        return build_detection_train_loader(cfg, mapper=custom_rotated_mapper)
 
 class RotatedVisualizer(Visualizer):
     def draw_dataset_dict(self, dic):
