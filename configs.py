@@ -47,10 +47,10 @@ def setup_rotated_cfg(args):
     cfg.SOLVER.STEPS=[1000,2000,4000,8000, 12000]
     cfg.SOLVER.MAX_ITER=10000
 
-    cfg.INPUT.MIN_SIZE_TRAIN = (600,)
-    cfg.INPUT.MAX_SIZE_TRAIN = 800
-    cfg.INPUT.MIN_SIZE_TEST = 600
-    cfg.INPUT.MAX_SIZE_TEST = 800
+    cfg.INPUT.MIN_SIZE_TRAIN = (300,)
+    cfg.INPUT.MAX_SIZE_TRAIN = 400
+    cfg.INPUT.MIN_SIZE_TEST = 300
+    cfg.INPUT.MAX_SIZE_TEST = 400
 
     cfg.DATALOADER.NUM_WORKERS = 4
     cfg.SOLVER.IMS_PER_BATCH = 50
@@ -96,10 +96,10 @@ def setup_cfg(args):
     cfg.MODEL.ANCHOR_GENERATOR.ASPECT_RATIOS = [[0.25, 0.5, 1.0, 2.0, 4.0, 8.0]]
     cfg.MODEL.ROI_HEADS.POSITIVE_FRACTION = 0.7
     cfg.MODEL.ROI_HEADS.IOU_THRESHOLDS = [0.5]
-    cfg.INPUT.MIN_SIZE_TRAIN = (600,)
-    cfg.INPUT.MAX_SIZE_TRAIN = 800
-    cfg.INPUT.MIN_SIZE_TEST = 600
-    cfg.INPUT.MAX_SIZE_TEST = 800
+    cfg.INPUT.MIN_SIZE_TRAIN = (300,)
+    cfg.INPUT.MAX_SIZE_TRAIN = 400
+    cfg.INPUT.MIN_SIZE_TEST = 300
+    cfg.INPUT.MAX_SIZE_TEST = 400
 
     # Setup Logging folder
     curTime = datetime.now()
