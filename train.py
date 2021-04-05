@@ -10,6 +10,8 @@ import argparse
 import torch
 import sys
 from detectron2.engine import launch
+import logging
+logger = logging.getLogger("detectron2")
 
 id_to_category = {
     0: 'car'

@@ -2,6 +2,7 @@ import os
 from detectron2.config import get_cfg
 from detectron2 import model_zoo
 from datetime import datetime
+from detectron2.engine import default_setup
 
 '''
     Backbone model:
@@ -72,6 +73,7 @@ def setup_rotated_cfg(args):
         os.makedirs(os.getcwd() + "/output/" + curTime.strftime("%m%d%Y%H%M%S"), exist_ok=True)
 
     cfg.freeze()                    # make the configuration unchangeable during the training process
+    default_setup(cfg, args)
     return cfg
 
 def setup_cfg(args):
@@ -113,4 +115,5 @@ def setup_cfg(args):
         os.makedirs(os.getcwd() + "/output/" + curTime.strftime("%m%d%Y%H%M%S"), exist_ok=True)
 
     cfg.freeze()                    # make the configuration unchangeable during the training process
+    default_setup(cfg, args)
     return cfg
