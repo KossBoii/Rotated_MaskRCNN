@@ -132,15 +132,19 @@ def main(args):
         MetadataCatalog.get(d).set(thing_classes=['car'])
 
     # setup config
-    cfg = setup_cfg()
-    cfg.dump()
-
-    # training starts
     if args.model == 'normal':
+        cfg = setup_cfg(args)
+        cfg.dump()
+
+        # training starts
         trainer = Trainer(cfg)
         trainer.resume_or_load(resume=True)
         trainer.train()
     elif args.model == 'rotate':
+        cfg = setup_rotated_cfg(args)
+        cfg.dump()
+
+        # training starts
         trainer = RotatedTrainer(cfg)
         trainer.resume_or_load(resume=True)
         trainer.train()
@@ -150,7 +154,7 @@ def main(args):
     predictor = DefaultPredictor(cfg)
     
     # visualize the result
-    img = cv2.imread('./dataset/train/imgs/DJI_0064.JPG')
+    img = cv2.imread('./dataset/train/imgs/DJI_0002.JPG')
     outputs = predictor(img)
     vis = RotatedVisualizer(
         img[:, :, ::-1],
