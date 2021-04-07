@@ -23,7 +23,7 @@ category_to_id = {
 
 def get_rotated_dataset(dataset_path):
     # Load and read json file stores information about annotations
-    json_file = os.path.join(dataset_path, 'segmask/annotations.json')
+    json_file = os.path.join(dataset_path, 'segmask/via_export_json.json')
     with open(json_file) as f:
         imgs_annos = json.load(f)
 
@@ -44,6 +44,7 @@ def get_rotated_dataset(dataset_path):
             # parsing rotated bounding box
             rotated_bboxes = []
             rbbox_filename = os.path.join(dataset_path, 'rbbox/%s.txt' % v["filename"][:-4])
+            count=0
             with open(rbbox_filename) as bbox_file:
                 lines = bbox_file.readlines()
                 for line in lines:
@@ -56,10 +57,13 @@ def get_rotated_dataset(dataset_path):
                     a = 180 - math.degrees(float(temp[5]))
                     rbbox = [cx, cy, w, h, a]
                     rotated_bboxes.append(rbbox)
+                    count+= 1
 
             # getting annotation for every instances of object in the image
             annos = v["regions"]
             objs = []
+            print('count: %d' % count)
+            print('anno_id: %d' % len(annos))
             for anno_id, anno in enumerate(annos):
                 class_name = anno['region_attributes']['name']
                 anno = anno['shape_attributes']
@@ -129,12 +133,13 @@ def main(args):
     # Register the dataset
     DatasetCatalog.clear()
     MetadataCatalog.clear()
-    for d in ['train']:
-        DatasetCatalog.register(d, lambda d=d: get_dataset(os.path.join(dataset_path, d)))
-        MetadataCatalog.get(d).set(thing_classes=['car'])
-
+    
     # setup config
     if args.model == 'normal':
+        for d in ['train']:
+            DatasetCatalog.register(d, lambda d=d: get_dataset(os.path.join(dataset_path, d)))
+            MetadataCatalog.get(d).set(thing_classes=['car'])
+
         cfg = setup_cfg(args)
         cfg.dump()
 
@@ -143,6 +148,10 @@ def main(args):
         trainer.resume_or_load(resume=False)
         trainer.train()
     elif args.model == 'rotate':
+        for d in ['train']:
+            DatasetCatalog.register(d, lambda d=d: get_rotated_dataset(os.path.join(dataset_path, d)))
+            MetadataCatalog.get(d).set(thing_classes=['car'])
+        
         cfg = setup_rotated_cfg(args)
         cfg.dump()
 
