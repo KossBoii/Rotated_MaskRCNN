@@ -140,7 +140,7 @@ def main(args):
 
         # training starts
         trainer = Trainer(cfg)
-        trainer.resume_or_load(resume=True)
+        trainer.resume_or_load(resume=False)
         trainer.train()
     elif args.model == 'rotate':
         cfg = setup_rotated_cfg(args)
@@ -148,7 +148,7 @@ def main(args):
 
         # training starts
         trainer = RotatedTrainer(cfg)
-        trainer.resume_or_load(resume=True)
+        trainer.resume_or_load(resume=False)
         trainer.train()
 
     # predictions

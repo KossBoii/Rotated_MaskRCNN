@@ -14,6 +14,7 @@ def transform_instance_annotations_rotated(annotation, transforms, image_size, *
         # Note that bbox is 1d (per-instance bounding box)
         annotation["bbox"] = transforms.apply_box([bbox])[0]
         annotation["bbox_mode"] = BoxMode.XYXY_ABS
+    return annotation
 
 def custom_rotated_mapper(dataset_dict):
     dataset_dict = copy.deepcopy(dataset_dict)  # it will be modified by code below

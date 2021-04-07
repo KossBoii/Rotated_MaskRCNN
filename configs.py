@@ -35,13 +35,13 @@ def setup_rotated_cfg(args):
     cfg.MODEL.ANCHOR_GENERATOR.ANGLES = [[-90,-60,-30,0,30,60,90]]
     cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = 0.5
     cfg.MODEL.ROI_HEADS.NAME = 'RROIHeads'
-    cfg.MODEL.ROI_HEADS.BATCH_SIZE_PER_IMAGE = 512   #this is far lower than usual.  
+    cfg.MODEL.ROI_HEADS.BATCH_SIZE_PER_IMAGE = 256   #this is far lower than usual.  
     cfg.MODEL.ROI_HEADS.NUM_CLASSES = 1
     cfg.MODEL.ROI_BOX_HEAD.POOLER_TYPE = 'ROIAlignRotated'
     cfg.MODEL.ROI_BOX_HEAD.BBOX_REG_WEIGHTS = (10,10,5,5,1)
     cfg.MODEL.ROI_BOX_HEAD.NUM_CONV=4
     cfg.MODEL.ROI_MASK_HEAD.NUM_CONV=8
-    cfg.SOLVER.IMS_PER_BATCH = 25 #can be up to  24 for a p100 (6 default)
+    cfg.SOLVER.IMS_PER_BATCH = 24 #can be up to  24 for a p100 (6 default)
     cfg.SOLVER.CHECKPOINT_PERIOD=1000
     cfg.SOLVER.BASE_LR = 0.005
     cfg.SOLVER.GAMMA=0.5
@@ -53,8 +53,8 @@ def setup_rotated_cfg(args):
     cfg.INPUT.MIN_SIZE_TEST = 300
     cfg.INPUT.MAX_SIZE_TEST = 400
 
-    cfg.DATALOADER.NUM_WORKERS = 4
-    cfg.SOLVER.IMS_PER_BATCH = 50
+    cfg.DATALOADER.NUM_WORKERS = 2
+    cfg.SOLVER.IMS_PER_BATCH = 24
     cfg.DATALOADER.FILTER_EMPTY_ANNOTATIONS = True 
     cfg.DATALOADER.SAMPLER_TRAIN= "RepeatFactorTrainingSampler"
     cfg.DATALOADER.REPEAT_THRESHOLD=0.01
@@ -85,17 +85,17 @@ def setup_cfg(args):
     cfg.DATASETS.TRAIN = (['train'])
     # cfg.DATASETS.TEST = (["Test"])
     
-    cfg.DATALOADER.NUM_WORKERS = 4
+    cfg.DATALOADER.NUM_WORKERS = 2
     cfg.SOLVER.IMS_PER_BATCH = 50                    # 2 GPUs --> each GPU will see 25 image per batch
     cfg.SOLVER.WARMUP_ITERS = 2000                  # 
     cfg.SOLVER.BASE_LR = 0.001
     cfg.SOLVER.MAX_ITER = 10000
     cfg.SOLVER.CHECKPOINT_PERIOD = 1000
-    cfg.MODEL.ANCHOR_GENERATOR.SIZES = [[4,8,16,32,64,128]]
-    cfg.MODEL.ROI_HEADS.BATCH_SIZE_PER_IMAGE = 512
+    cfg.MODEL.ANCHOR_GENERATOR.SIZES = [[4,8,16,32,64]]
+    cfg.MODEL.ROI_HEADS.BATCH_SIZE_PER_IMAGE = 256
     cfg.MODEL.ROI_HEADS.NUM_CLASSES = 1             # 1 category (roadway stress)
 
-    cfg.MODEL.ANCHOR_GENERATOR.ASPECT_RATIOS = [[0.25, 0.5, 1.0, 2.0, 4.0, 8.0]]
+    cfg.MODEL.ANCHOR_GENERATOR.ASPECT_RATIOS = [[0.5, 1.0, 2.0]]
     cfg.MODEL.ROI_HEADS.POSITIVE_FRACTION = 0.7
     cfg.MODEL.ROI_HEADS.IOU_THRESHOLDS = [0.5]
     cfg.INPUT.MIN_SIZE_TRAIN = (300,)
