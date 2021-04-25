@@ -32,16 +32,16 @@ def setup_rotated_cfg(args):
     cfg.MODEL.RPN.HEAD_NAME = 'StandardRPNHead'
     cfg.MODEL.RPN.BBOX_REG_WEIGHTS = (1,1,1,1,1)
     cfg.MODEL.ANCHOR_GENERATOR.NAME = 'RotatedAnchorGenerator'
-    cfg.MODEL.ANCHOR_GENERATOR.ANGLES = [[-90,-60,-30,0,30,60,90]]
+    cfg.MODEL.ANCHOR_GENERATOR.ANGLES = [[-60,-30,0,30,60]]
     cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = 0.5
     cfg.MODEL.ROI_HEADS.NAME = 'RROIHeads'
-    cfg.MODEL.ROI_HEADS.BATCH_SIZE_PER_IMAGE = 256   #this is far lower than usual.  
+    cfg.MODEL.ROI_HEADS.BATCH_SIZE_PER_IMAGE = 128 #this is far lower than usual.  
     cfg.MODEL.ROI_HEADS.NUM_CLASSES = 1
     cfg.MODEL.ROI_BOX_HEAD.POOLER_TYPE = 'ROIAlignRotated'
     cfg.MODEL.ROI_BOX_HEAD.BBOX_REG_WEIGHTS = (10,10,5,5,1)
     cfg.MODEL.ROI_BOX_HEAD.NUM_CONV=4
     cfg.MODEL.ROI_MASK_HEAD.NUM_CONV=8
-    cfg.SOLVER.IMS_PER_BATCH = 24 #can be up to  24 for a p100 (6 default)
+    cfg.SOLVER.IMS_PER_BATCH = 5 #can be up to  24 for a p100 (6 default)
     cfg.SOLVER.CHECKPOINT_PERIOD=1000
     cfg.SOLVER.BASE_LR = 0.005
     cfg.SOLVER.GAMMA=0.5
@@ -53,8 +53,8 @@ def setup_rotated_cfg(args):
     cfg.INPUT.MIN_SIZE_TEST = 300
     cfg.INPUT.MAX_SIZE_TEST = 400
 
-    cfg.DATALOADER.NUM_WORKERS = 2
-    cfg.SOLVER.IMS_PER_BATCH = 24
+    cfg.DATALOADER.NUM_WORKERS = 1
+    cfg.SOLVER.IMS_PER_BATCH = 1
     cfg.DATALOADER.FILTER_EMPTY_ANNOTATIONS = True 
     cfg.DATALOADER.SAMPLER_TRAIN= "RepeatFactorTrainingSampler"
     cfg.DATALOADER.REPEAT_THRESHOLD=0.01
@@ -86,7 +86,7 @@ def setup_cfg(args):
     # cfg.DATASETS.TEST = (["Test"])
     
     cfg.DATALOADER.NUM_WORKERS = 2
-    cfg.SOLVER.IMS_PER_BATCH = 50                    # 2 GPUs --> each GPU will see 25 image per batch
+    cfg.SOLVER.IMS_PER_BATCH = 5                    # 2 GPUs --> each GPU will see 25 image per batch
     cfg.SOLVER.WARMUP_ITERS = 2000                  # 
     cfg.SOLVER.BASE_LR = 0.001
     cfg.SOLVER.MAX_ITER = 10000

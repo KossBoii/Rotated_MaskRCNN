@@ -23,8 +23,8 @@ def custom_rotated_mapper(dataset_dict):
     transform_list = [
                     T.Resize((300, 400)),
                     T.RandomFlip(prob=0.6, horizontal=True, vertical=False),
-                    T.RandomFlip(prob=0.6, horizontal=False, vertical=True),
-                    T.RandomBrightness(0.9, 1.1),
+                    # T.RandomFlip(prob=0.6, horizontal=False, vertical=True),
+                    # T.RandomBrightness(0.9, 1.1),
     ]
 
     image, transforms = T.apply_transform_gens(transform_list, image)

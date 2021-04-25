@@ -11,7 +11,11 @@ import torch
 import sys
 from detectron2.engine import launch
 import logging
+import os
 logger = logging.getLogger("detectron2")
+
+import torch
+from torch.utils.cpp_extension import CUDA_HOME
 
 id_to_category = {
     0: 'car'
@@ -62,8 +66,8 @@ def get_rotated_dataset(dataset_path):
             # getting annotation for every instances of object in the image
             annos = v["regions"]
             objs = []
-            print('count: %d' % count)
-            print('anno_id: %d' % len(annos))
+            # print('count: %d' % count)
+            # print('anno_id: %d' % len(annos))
             for anno_id, anno in enumerate(annos):
                 class_name = anno['region_attributes']['name']
                 anno = anno['shape_attributes']
@@ -72,13 +76,18 @@ def get_rotated_dataset(dataset_path):
                 poly = [(x + 0.5, y + 0.5) for x, y in zip(px, py)]
                 poly = [p for x in poly for p in x]
 
-                obj = {
-                    'bbox': rotated_bboxes[anno_id],
-                    'bbox_mode': BoxMode.XYWHA_ABS,
-                    'segmentation': [poly],
-                    'category_id': category_to_id[class_name],
-                    'iscrowd': 0
-                }
+                try:
+                    obj = {
+                        'bbox': rotated_bboxes[anno_id],
+                        'bbox_mode': BoxMode.XYWHA_ABS,
+                        'segmentation': [poly],
+                        'category_id': category_to_id[class_name],
+                        'iscrowd': 0
+                    }
+                except IndexError:
+                    print(v["filename"])
+                except KeyError:
+                    print(v["filename"])
                 objs.append(obj)
             record['annotations'] = objs
             dataset_dicts.append(record)
@@ -127,6 +136,7 @@ def get_dataset(dataset_path):
     return dataset_dicts
 
 def main(args):
+    print(torch.cuda.is_available(), CUDA_HOME)
     ROOT_DIR = os.getcwd()
     dataset_path = os.path.join(ROOT_DIR, 'dataset')
 
