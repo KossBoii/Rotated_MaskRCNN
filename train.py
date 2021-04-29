@@ -197,13 +197,13 @@ def custom_default_argument_parser(epilog=None):
     parser = argparse.ArgumentParser(
         epilog=epilog
         or f"""
-    Examples:
-    Run on single machine:
-        $ {sys.argv[0]} --num-gpus 8 --config-file cfg.yaml MODEL.WEIGHTS /path/to/weight.pth
-    Run on multiple machines:
-        (machine0)$ {sys.argv[0]} --machine-rank 0 --num-machines 2 --dist-url <URL> [--other-flags]
-        (machine1)$ {sys.argv[0]} --machine-rank 1 --num-machines 2 --dist-url <URL> [--other-flags]
-    """,
+Examples:
+Run on single machine:
+    $ {sys.argv[0]} --num-gpus 8 --config-file cfg.yaml MODEL.WEIGHTS /path/to/weight.pth
+Run on multiple machines:
+    (machine0)$ {sys.argv[0]} --machine-rank 0 --num-machines 2 --dist-url <URL> [--other-flags]
+    (machine1)$ {sys.argv[0]} --machine-rank 1 --num-machines 2 --dist-url <URL> [--other-flags]
+""",
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
     parser.add_argument("--model", default='normal', help='type of the model (normal/rotate)')
