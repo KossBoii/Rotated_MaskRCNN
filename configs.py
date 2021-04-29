@@ -25,17 +25,17 @@ def setup_rotated_cfg(args):
     cfg.merge_from_file(model_zoo.get_config_file(args.backbone))
     cfg.MODEL.WEIGHTS = model_zoo.get_checkpoint_url(args.backbone)  
     cfg.DATASETS.TRAIN = (['train'])
-    # cfg.DATASETS.TEST = (["Test"])
+    cfg.DATASETS.TEST = ([])
 
     cfg.MODEL.MASK_ON=False
     cfg.MODEL.PROPOSAL_GENERATOR.NAME = 'RRPN'
     cfg.MODEL.RPN.HEAD_NAME = 'StandardRPNHead'
     cfg.MODEL.RPN.BBOX_REG_WEIGHTS = (1,1,1,1,1)
     cfg.MODEL.ANCHOR_GENERATOR.NAME = 'RotatedAnchorGenerator'
-    cfg.MODEL.ANCHOR_GENERATOR.ANGLES = [[-60,-30,0,30,60]]
+    cfg.MODEL.ANCHOR_GENERATOR.ANGLES = [[-90,-60,-30,0,30,60,90]]
     cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = 0.5
     cfg.MODEL.ROI_HEADS.NAME = 'RROIHeads'
-    cfg.MODEL.ROI_HEADS.BATCH_SIZE_PER_IMAGE = 128 #this is far lower than usual.  
+    cfg.MODEL.ROI_HEADS.BATCH_SIZE_PER_IMAGE = 512 #this is far lower than usual.  
     cfg.MODEL.ROI_HEADS.NUM_CLASSES = 1
     cfg.MODEL.ROI_BOX_HEAD.POOLER_TYPE = 'ROIAlignRotated'
     cfg.MODEL.ROI_BOX_HEAD.BBOX_REG_WEIGHTS = (10,10,5,5,1)
@@ -54,11 +54,10 @@ def setup_rotated_cfg(args):
     cfg.INPUT.MAX_SIZE_TEST = 400
 
     cfg.DATALOADER.NUM_WORKERS = 1
-    cfg.SOLVER.IMS_PER_BATCH = 1
+    cfg.SOLVER.IMS_PER_BATCH = 10
     cfg.DATALOADER.FILTER_EMPTY_ANNOTATIONS = True 
     cfg.DATALOADER.SAMPLER_TRAIN= "RepeatFactorTrainingSampler"
     cfg.DATALOADER.REPEAT_THRESHOLD=0.01
-    os.makedirs(cfg.OUTPUT_DIR, exist_ok=True)#lets just check our output dir exists
     cfg.MODEL.BACKBONE.FREEZE_AT=6
 
     # Setup Logging folder
@@ -83,16 +82,16 @@ def setup_cfg(args):
 
     # dataset configuration  
     cfg.DATASETS.TRAIN = (['train'])
-    # cfg.DATASETS.TEST = (["Test"])
+    cfg.DATASETS.TEST = ([])
     
     cfg.DATALOADER.NUM_WORKERS = 2
-    cfg.SOLVER.IMS_PER_BATCH = 5                    # 2 GPUs --> each GPU will see 25 image per batch
+    cfg.SOLVER.IMS_PER_BATCH = 10                    # 2 GPUs --> each GPU will see 25 image per batch
     cfg.SOLVER.WARMUP_ITERS = 2000                  # 
     cfg.SOLVER.BASE_LR = 0.001
     cfg.SOLVER.MAX_ITER = 10000
     cfg.SOLVER.CHECKPOINT_PERIOD = 1000
     cfg.MODEL.ANCHOR_GENERATOR.SIZES = [[4,8,16,32,64]]
-    cfg.MODEL.ROI_HEADS.BATCH_SIZE_PER_IMAGE = 256
+    cfg.MODEL.ROI_HEADS.BATCH_SIZE_PER_IMAGE = 512
     cfg.MODEL.ROI_HEADS.NUM_CLASSES = 1             # 1 category (roadway stress)
 
     cfg.MODEL.ANCHOR_GENERATOR.ASPECT_RATIOS = [[0.5, 1.0, 2.0]]
