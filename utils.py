@@ -5,6 +5,10 @@ from detectron2.data import detection_utils as utils
 from detectron2.data import transforms as T
 import torch
 import numpy as np
+import os
+import json
+import cv2
+import math
 
 def transform_instance_annotations_rotated(annotation, transforms, image_size, *, keypoint_hflip_indices=None):
     if annotation["bbox_mode"] == BoxMode.XYWHA_ABS:        # rotated bbox
@@ -39,11 +43,6 @@ def custom_rotated_mapper(dataset_dict):
     instances = utils.annotations_to_instances_rotated(annos, image.shape[:2])
     dataset_dict["instances"] = utils.filter_empty_instances(instances)
     return dataset_dict
-
-
-
-
-
 
 def custom_mapper(dataset_dict):
   dataset_dict = copy.deepcopy(dataset_dict)
@@ -93,3 +92,122 @@ def custom_mapper(dataset_dict):
     #     'image': image,
     #     'instances': utils.filter_empty_instances(instances)
     # }
+
+id_to_category = {
+    0: 'car'
+}
+
+category_to_id = {
+    'car': 0
+}
+
+def get_rotated_dataset(dataset_path):
+    # Load and read json file stores information about annotations
+    json_file = os.path.join(dataset_path, 'segmask/via_export_json.json')
+    with open(json_file) as f:
+        imgs_annos = json.load(f)
+
+    dataset_dicts = []          # list of annotations info for every images in the dataset
+    for idx, v in enumerate(imgs_annos.values()):                   # loop through every image
+        if(v["regions"]):
+            record = {}         # a dictionary to store all necessary info of each image in the dataset
+            
+            # open the image to get the height and width
+            filename = os.path.join(dataset_path, 'imgs/' + v["filename"])
+            height, width = cv2.imread(filename).shape[:2]
+            
+            record["file_name"] = filename
+            record["image_id"] = idx
+            record["height"] = height
+            record["width"] = width
+
+            # parsing rotated bounding box
+            rotated_bboxes = []
+            rbbox_filename = os.path.join(dataset_path, 'rbbox/%s.txt' % v["filename"][:-4])
+            count=0
+            with open(rbbox_filename) as bbox_file:
+                lines = bbox_file.readlines()
+                for line in lines:
+                    temp = line.split()
+                    assert len(temp) == 6
+                    cx = float(temp[1])
+                    cy = float(temp[2])
+                    w = float(temp[3])
+                    h = float(temp[4])
+                    a = 180 - math.degrees(float(temp[5]))
+                    rbbox = [cx, cy, w, h, a]
+                    rotated_bboxes.append(rbbox)
+                    count+= 1
+
+            # getting annotation for every instances of object in the image
+            annos = v["regions"]
+            objs = []
+            # print('count: %d' % count)
+            # print('anno_id: %d' % len(annos))
+            for anno_id, anno in enumerate(annos):
+                class_name = anno['region_attributes']['name']
+                anno = anno['shape_attributes']
+                px = anno['all_points_x']
+                py = anno['all_points_y']
+                poly = [(x + 0.5, y + 0.5) for x, y in zip(px, py)]
+                poly = [p for x in poly for p in x]
+
+                try:
+                    obj = {
+                        'bbox': rotated_bboxes[anno_id],
+                        'bbox_mode': BoxMode.XYWHA_ABS,
+                        'segmentation': [poly],
+                        'category_id': category_to_id[class_name],
+                        'iscrowd': 0
+                    }
+                except IndexError:
+                    print(v["filename"])
+                except KeyError:
+                    print(v["filename"])
+                objs.append(obj)
+            record['annotations'] = objs
+            dataset_dicts.append(record)
+    return dataset_dicts
+
+def get_dataset(dataset_path):
+    # Load and read json file stores information about annotations
+    json_file = os.path.join(dataset_path, "bbox/via_export_json.json")
+    with open(json_file) as f:
+        imgs_anns = json.load(f)
+
+    dataset_dicts = []          # list of annotations info for every images in the dataset
+    for idx, v in enumerate(imgs_anns.values()):
+        if(v["regions"]):
+            record = {}         # a dictionary to store all necessary info of each image in the dataset
+            
+            # open the image to get the height and width
+            filename = os.path.join(dataset_path, 'imgs/' + v["filename"])
+            height, width = cv2.imread(filename).shape[:2]
+            
+            record["file_name"] = filename
+            record["image_id"] = idx
+            record["height"] = height
+            record["width"] = width
+          
+            # getting annotation for every instances of object in the image
+            annos = v["regions"]
+            objs = []
+            for anno in annos:
+                anno = anno["shape_attributes"]
+                px = anno["all_points_x"]
+                py = anno["all_points_y"]
+                poly = [(x + 0.5, y + 0.5) for x, y in zip(px, py)]
+                poly = [p for x in poly for p in x]
+
+                obj = {
+                    "bbox": [np.min(px), np.min(py), np.max(px), np.max(py)],
+                    "bbox_mode": BoxMode.XYXY_ABS,
+                    "segmentation": [poly],
+                    "category_id": 0,
+                    "iscrowd": 0
+                }
+                objs.append(obj)
+            record["annotations"] = objs
+            dataset_dicts.append(record)
+    return dataset_dicts
+
