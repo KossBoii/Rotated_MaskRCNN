@@ -1,7 +1,7 @@
 import detectron2
 import copy
 from detectron2.structures import BoxMode
-from detectron2.data import detection_utils as utils
+from detectron2.data import detection_utils
 from detectron2.data import transforms as T
 import torch
 import numpy as np
@@ -9,6 +9,37 @@ import os
 import json
 import cv2
 import math
+
+from detectron2.structures import Instances, PolygonMasks, RotatedBoxes
+import logging
+
+def my_annotations_to_instances_rotated(annos, image_size, mask_format="polygon"):
+    boxes = [BoxMode.convert(obj["bbox"], obj["bbox_mode"], BoxMode.XYWHA_ABS) for obj in annos]
+    target = Instances(image_size)
+    boxes = target.gt_boxes = RotatedBoxes(boxes)
+    boxes.clip(image_size)
+
+    classes = [int(obj["category_id"]) for obj in annos]
+    classes = torch.tensor(classes, dtype=torch.int64)
+    target.gt_classes = classes
+
+    if len(annos) and "segmentation" in annos[0]:
+        segms = [obj["segmentation"] for obj in annos]
+        masks = None
+        if mask_format == "polygon":
+            try:
+                masks = PolygonMasks(segms)
+            except ValueError as e:
+                raise ValueError(
+                    "Failed to use mask_format=='polygon' from the given annotations!"
+                ) from e
+        target.gt_masks = masks
+
+        # logger = logging.getLogger(__name__)
+        # logger.error(masks)
+        # logger.error('-----------------------------------Instance has gt_masks!-----------------------------------')
+
+    return target
 
 def transform_instance_annotations_rotated(annotation, transforms, image_size, *, keypoint_hflip_indices=None):
     if annotation["bbox_mode"] == BoxMode.XYWHA_ABS:        # rotated bbox
@@ -22,7 +53,7 @@ def transform_instance_annotations_rotated(annotation, transforms, image_size, *
 
 def custom_rotated_mapper(dataset_dict):
     dataset_dict = copy.deepcopy(dataset_dict)  # it will be modified by code below
-    image = utils.read_image(dataset_dict["file_name"], format="BGR")
+    image = detection_utils.read_image(dataset_dict["file_name"], format="BGR")
 
     transform_list = [
                     T.Resize((300, 400)),
@@ -40,13 +71,16 @@ def custom_rotated_mapper(dataset_dict):
         if obj.get("iscrowd", 0) == 0
     ]
     
-    instances = utils.annotations_to_instances_rotated(annos, image.shape[:2])
-    dataset_dict["instances"] = utils.filter_empty_instances(instances)
+    # instances = detection_utils.annotations_to_instances_rotated(annos, image.shape[:2])
+    instances = my_annotations_to_instances_rotated(annos, image.shape[:2], mask_format="polygon")
+    # logger = logging.getLogger(__name__)
+    # logger.error(instances)
+    dataset_dict["instances"] = detection_utils.filter_empty_instances(instances)
     return dataset_dict
 
 def custom_mapper(dataset_dict):
   dataset_dict = copy.deepcopy(dataset_dict)
-  image = utils.read_image(dataset_dict["file_name"], format="BGR")
+  image = detection_utils.read_image(dataset_dict["file_name"], format="BGR")
 
   transform_list = [
                     T.Resize((300, 400)),
@@ -57,41 +91,13 @@ def custom_mapper(dataset_dict):
   image, transforms = T.apply_transform_gens(transform_list, image)
   dataset_dict["image"] = torch.as_tensor(image.transpose(2, 0, 1).astype("float32"))
   annos = [
-		utils.transform_instance_annotations(obj, transforms, image.shape[:2])
+		detection_utils.transform_instance_annotations(obj, transforms, image.shape[:2])
 		for obj in dataset_dict.pop("annotations")
 		if obj.get("iscrowd", 0) == 0
 	]
-  instances = utils.annotations_to_instances(annos, image.shape[:2])
-  dataset_dict["instances"] = utils.filter_empty_instances(instances)
+  instances = detection_utils.annotations_to_instances(annos, image.shape[:2])
+  dataset_dict["instances"] = detection_utils.filter_empty_instances(instances)
   return dataset_dict
-
-
-    # dataset_dict = copy.deepcopy(dataset_dict)
-    # image = utils.read_image(dataset_dict["file_name"], format="BGR")
-    
-    # # Data Augmentation 
-    # augs = T.AugmentationList([
-    #     T.Resize((300, 400)),
-    #     T.RandomBrightness(0.9, 1.1),
-    #     T.RandomFlip(prob=0.6, horizontal=True, vertical=False),
-    #     T.RandomFlip(prob=0.6, horizontal=False, vertical=True),
-    # ])
-
-    # input = T.AugInput(image)
-    # transforms = augs(input)
-    # # image = torch.from_numpy(input.image.transpose(2,0,1))
-    # image = torch.as_tensor(input.image.transpose(2, 0, 1))
-
-    # annos = [
-    #     transform_instance_annotations_rotated(annotation, transforms, image.shape[1:])
-    #     for annotation in dataset_dict.pop('annotations')
-    # ]
-    # instances = utils.annotations_to_instances_rotated(annos, image.shape[1:])
-
-    # return {
-    #     'image': image,
-    #     'instances': utils.filter_empty_instances(instances)
-    # }
 
 id_to_category = {
     0: 'car'
